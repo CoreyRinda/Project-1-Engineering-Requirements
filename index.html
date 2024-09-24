@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Unix Network (SUN) Lab Access</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>SUN Lab Access System</h1>
+    <form id="swipeForm">
+      <input type="text" id="studentId" placeholder="Enter Student ID" required>
+      <button id="swipe" type="submit">Swipe</button>
+    </form>
+
+    <div class="admin-panel" id="adminPanel">
+      <h2>Admin Panel</h2>
+      <button id="adminLogin">Admin Login</button>
+      <div id="adminActions" style="display: none;">
+        <h3>Search History</h3>
+        <select id="filterType">
+          <option value="date">Filter by Date</option>
+          <option value="id">Filter by ID</option>
+          <option value="timeRange">Filter by Time Range</option>
+        </select>
+        <input type="text" id="filterInput" placeholder="Enter filter value">
+        <button id="filterBtn">Filter</button>
+        <div id="filterResults"></div>
+
+        <h3>User Management</h3>
+        <select id="userType">
+          <option value="student">Student</option>
+          <option value="faculty">Faculty Member</option>
+          <option value="staff">Staff Member</option>
+          <option value="janitor">Janitor</option>
+        </select>
+        <input type="text" id="userId" placeholder="Enter User ID">
+        <button id="activateBtn">Activate ID</button>
+        <button id="suspendBtn">Suspend ID</button>
+        <button id="reactivateBtn">Reactivate ID</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+    import {getDatabase, set, get, update, ref} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+    
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "sun-lab-signin.firebaseapp.com",
+      projectId: "sun-lab-signin",
+      storageBucket: "sun-lab-signin.appspot.com",
+      messagingSenderId: "821582933298",
+      appId: "1:821582933298:web:816a0305fa729972e13b2b",
+      measurementId: "G-6XD6D9FWP2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getDatabase();
+
+    // Handling Swipe Insert
+    var studentID = document.querySelector("#studentId");
+    const now = new Date();
+    const formattedDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+    const formattedTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+
+    function InsertData() {
+      set(ref(db, "Log-ins/" + studentID.value), {
+        ID: studentID.value,
+        Time: formattedDate + " -- " + formattedTime
+      })
+      .then(() => {
+        alert("Login Success!");
+      })
+      .catch((error) => {
+        alert(error);
+      });
+    }
+
+    swipe.addEventListener('click', InsertData);
+
+    // Admin Functionality
+    var adminLoginBtn = document.querySelector("#adminLogin");
+    var adminActions = document.querySelector("#adminActions");
+
+    adminLoginBtn.addEventListener('click', function() {
+      // Simulated login, you may add Firebase authentication
+      adminActions.style.display = 'block';
+    });
+
+    // Filter Functionality
+    document.querySelector("#filterBtn").addEventListener('click', function() {
+      let filterType = document.querySelector("#filterType").value;
+      let filterValue = document.querySelector("#filterInput").value;
+      // Implement filtering logic based on date, ID, or time range using Firebase query
+    });
+
+    // Activate, Suspend, Reactivate Functionality
+    document.querySelector("#activateBtn").addEventListener('click', function() {
+      let userType = document.querySelector("#userType").value;
+      let userId = document.querySelector("#userId").value;
+      update(ref(db, "Users/" + userId), { status: "active", userType: userType })
+        .then(() => { alert("ID Activated!"); });
+    });
+
+    document.querySelector("#suspendBtn").addEventListener('click', function() {
+      let userId = document.querySelector("#userId").value;
+      update(ref(db, "Users/" + userId), { status: "suspended" })
+        .then(() => { alert("ID Suspended!"); });
+    });
+
+    document.querySelector("#reactivateBtn").addEventListener('click', function() {
+      let userId = document.querySelector("#userId").value;
+      update(ref(db, "Users/" + userId), { status: "active" })
+        .then(() => { alert("ID Reactivated!"); });
+    });
+  </script>
+
+</body>
+</html>
